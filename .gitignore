@@ -1,0 +1,104 @@
+# ============================================================
+# GUSTOVIFY — Root .gitignore
+# ============================================================
+
+# ─── Python / Backend ───────────────────────────────────────
+Backend/__pycache__/
+Backend/**/__pycache__/
+Backend/*.py[cod]
+Backend/*.pyo
+
+# Virtual environment
+Backend/venv/
+Backend/.venv/
+Backend/env/
+
+# SQLite databases (local data — do NOT commit)
+Backend/*.db
+Backend/*.db-shm
+Backend/*.db-wal
+Backend/*.sqlite
+Backend/*.sqlite3
+
+# Environment & secrets
+Backend/.env
+Backend/.env.*
+*.env
+
+# Python eggs / build artifacts
+Backend/*.egg-info/
+Backend/dist/
+Backend/build/
+Backend/.eggs/
+
+# pytest / coverage
+Backend/.pytest_cache/
+Backend/htmlcov/
+Backend/.coverage
+Backend/coverage.xml
+
+# ─── Mobile / Expo (React Native) ────────────────────────────
+Mobile/node_modules/
+Mobile/.expo/
+Mobile/dist/
+Mobile/web-build/
+Mobile/.pnp/
+Mobile/.pnp.js
+
+# Android build
+Mobile/android/.gradle/
+Mobile/android/build/
+Mobile/android/app/build/
+Mobile/android/.idea/
+Mobile/android/local.properties
+
+# iOS build
+Mobile/ios/build/
+Mobile/ios/Pods/
+Mobile/ios/*.xcworkspace/
+Mobile/ios/*.xcodeproj/xcuserdata/
+
+# Expo & Metro cache
+Mobile/.metro-cache/
+Mobile/.cache/
+
+# Expo secrets / EAS
+Mobile/.env
+Mobile/.env.*
+Mobile/eas.json
+
+# Drizzle local SQLite
+Mobile/db/*.db
+Mobile/db/*.db-shm
+Mobile/db/*.db-wal
+
+# ─── Genel / OS ──────────────────────────────────────────────
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+*.bak
+*.tmp
+*.swp
