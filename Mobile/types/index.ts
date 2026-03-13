@@ -101,6 +101,7 @@ export interface Recipe {
     instructions: string[];
     servings: number;
     ingredients: RecipeIngredient[];
+    user_id?: number;
 }
 
 export interface RecipeCreateIngredient {

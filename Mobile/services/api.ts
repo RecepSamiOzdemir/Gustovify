@@ -1,4 +1,7 @@
 import { API_URL } from '../constants/Config';
+import { Storage } from './storage';
+
+let isRefreshing = false;
 
 export const api = {
     get: async (endpoint: string, token?: string) => {
@@ -7,7 +10,7 @@ export const api = {
             method: 'GET',
             headers,
         });
-        return handleResponse(response);
+        return handleResponse(response, 'GET', endpoint);
     },
 
     post: async (endpoint: string, body: any, token?: string) => {
@@ -17,7 +20,7 @@ export const api = {
             headers,
             body: JSON.stringify(body),
         });
-        return handleResponse(response);
+        return handleResponse(response, 'POST', endpoint, body);
     },
 
     put: async (endpoint: string, body: any, token?: string) => {
@@ -27,7 +30,7 @@ export const api = {
             headers,
             body: JSON.stringify(body),
         });
-        return handleResponse(response);
+        return handleResponse(response, 'PUT', endpoint, body);
     },
 
     delete: async (endpoint: string, token?: string) => {
@@ -36,11 +39,9 @@ export const api = {
             method: 'DELETE',
             headers,
         });
-        return handleResponse(response);
+        return handleResponse(response, 'DELETE', endpoint);
     },
 };
-
-import { Storage } from './storage';
 
 async function getHeaders(token?: string): Promise<HeadersInit> {
     const headers: HeadersInit = {
@@ -50,7 +51,6 @@ async function getHeaders(token?: string): Promise<HeadersInit> {
     if (!token) {
         try {
             const storedToken = await Storage.getItem('token');
-            console.log('Stored Token:', storedToken ? 'Found' : 'Not Found');
             if (storedToken) {
                 token = storedToken;
             }
@@ -65,7 +65,33 @@ async function getHeaders(token?: string): Promise<HeadersInit> {
     return headers;
 }
 
-async function handleResponse(response: Response) {
+async function handleResponse(response: Response, method: string, endpoint: string, body?: any) {
+    if (response.status === 401 && !isRefreshing) {
+        isRefreshing = true;
+        try {
+            const { authService } = await import('./auth');
+            const newToken = await authService.refreshToken();
+            if (newToken) {
+                // Retry the original request with the new token
+                const retryHeaders = await getHeaders(newToken);
+                const retryOptions: RequestInit = {
+                    method,
+                    headers: retryHeaders,
+                };
+                if (body && (method === 'POST' || method === 'PUT')) {
+                    retryOptions.body = JSON.stringify(body);
+                }
+                const retryResponse = await fetch(`${API_URL}${endpoint}`, retryOptions);
+                if (retryResponse.ok) {
+                    return retryResponse.json();
+                }
+            }
+        } finally {
+            isRefreshing = false;
+        }
+        throw new Error('Oturum süresi doldu, lütfen tekrar giriş yapın');
+    }
+
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.detail || 'Bir hata oluştu');

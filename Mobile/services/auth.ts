@@ -22,6 +22,7 @@ export const authService = {
 
         const data = await response.json();
         await Storage.setItem('token', data.access_token);
+        await Storage.setItem('refreshToken', data.refresh_token);
         return data;
     },
 
@@ -30,6 +31,34 @@ export const authService = {
     },
 
     logout: async () => {
+        const refreshToken = await Storage.getItem('refreshToken');
+        if (refreshToken) {
+            try {
+                await api.post('/auth/logout', { refresh_token: refreshToken });
+            } catch (_) { /* ignore logout errors */ }
+        }
         await Storage.deleteItem('token');
+        await Storage.deleteItem('refreshToken');
+    },
+
+    refreshToken: async (): Promise<string | null> => {
+        const refreshToken = await Storage.getItem('refreshToken');
+        if (!refreshToken) return null;
+
+        try {
+            const response = await fetch(`${API_URL}/auth/refresh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refresh_token: refreshToken }),
+            });
+            if (!response.ok) return null;
+
+            const data = await response.json();
+            await Storage.setItem('token', data.access_token);
+            await Storage.setItem('refreshToken', data.refresh_token);
+            return data.access_token;
+        } catch {
+            return null;
+        }
     }
 };

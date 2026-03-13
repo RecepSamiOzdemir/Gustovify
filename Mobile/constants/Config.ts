@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 
 const localhost = Platform.select({
     android: '127.0.0.1', // Changed from localhost to 127.0.0.1 for adb reverse reliability
-    ios: '192.168.2.108',
+    ios: '192.168.1.140',
     web: 'localhost',
     default: 'localhost',
 });

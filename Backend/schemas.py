@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional
 from datetime import date
 
@@ -55,6 +55,7 @@ class RecipeCreate(RecipeBase):
 
 class Recipe(RecipeBase):
     id: int
+    user_id: Optional[int] = None
     ingredients: List[Ingredient]
 
     class Config:
@@ -148,6 +149,17 @@ class UserCreate(UserBase):
     allergen_ids: Optional[List[int]] = []
     preference_ids: Optional[List[int]] = []
 
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError('Şifre en az 8 karakter olmalıdır')
+        if not any(c.isupper() for c in v):
+            raise ValueError('Şifre en az bir büyük harf içermelidir')
+        if not any(c.isdigit() for c in v):
+            raise ValueError('Şifre en az bir rakam içermelidir')
+        return v
+
 class UserUpdate(BaseModel):
     password: Optional[str] = None
     full_name: Optional[str] = None
@@ -176,10 +188,18 @@ class User(UserBase):
     class Config:
         from_attributes = True
 
-# Token yanıtı için şema
+# Token yanıtı için şemalar
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
 
 class TokenData(BaseModel):
     email: Optional[str] = None

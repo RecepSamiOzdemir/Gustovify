@@ -43,11 +43,13 @@ class MasterIngredient(Base):
 class Recipe(Base):
     __tablename__ = "recipes"
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String) # TDD 2.3 [cite: 24]
-    instructions = Column(String) # Adımları şimdilik JSON-string olarak tutacağız
-    servings = Column(Integer) # TDD 4.2 [cite: 54]
-    
-    ingredients = relationship("RecipeIngredient", back_populates="recipe")
+    title = Column(String)
+    instructions = Column(String)  # JSON string
+    servings = Column(Integer)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    ingredients = relationship("RecipeIngredient", back_populates="recipe", cascade="all, delete-orphan")
+    owner = relationship("User")
 
 class RecipeIngredient(Base): # Renamed from Ingredient
     __tablename__ = "recipe_ingredients"
@@ -115,7 +117,6 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
-    hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
     full_name = Column(String, nullable=True)
     city = Column(String, nullable=True)
@@ -130,3 +131,14 @@ class User(Base):
     shopping_list = relationship("ShoppingListItem", back_populates="user")
     related_allergens = relationship("Allergen", secondary=user_allergens)
     related_preferences = relationship("DietaryPreference", secondary=user_preferences)
+
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+    id = Column(Integer, primary_key=True, index=True)
+    token = Column(String, unique=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    expires_at = Column(Date)
+    is_revoked = Column(Boolean, default=False)
+
+    user = relationship("User")
