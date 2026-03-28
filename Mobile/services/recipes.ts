@@ -5,7 +5,8 @@ export { Recipe, RecipeCreate, RecipeUpdate };
 
 export const recipeService = {
     getAll: async (token?: string): Promise<Recipe[]> => {
-        return api.get('/recipes/', token);
+        const data = await api.get('/recipes/', token);
+        return data.items ?? data;
     },
 
     create: async (recipe: RecipeCreate) => {

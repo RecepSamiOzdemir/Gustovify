@@ -1,6 +1,9 @@
-from auth import get_password_hash, verify_password, create_access_token, SECRET_KEY, ALGORITHM
-from jose import jwt
 from datetime import timedelta
+
+from jose import jwt
+
+from auth import ALGORITHM, SECRET_KEY, create_access_token, get_password_hash, verify_password
+
 
 def test_auth_flow():
     print("--- Authentication Verification Started ---")
@@ -13,7 +16,7 @@ def test_auth_flow():
     # 2. Test Password Verification
     assert verify_password(password, hashed) == True
     print("[OK] Password verification successful")
-    
+
     assert verify_password("wrongpassword", hashed) == False
     print("[OK] Wrong password correctly rejected")
 

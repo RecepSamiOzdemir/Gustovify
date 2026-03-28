@@ -1,7 +1,7 @@
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Modal, TextInput, Platform } from 'react-native';
-import { useEffect, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Modal, TextInput, Platform, RefreshControl } from 'react-native';
+import { useState, useCallback } from 'react';
 import { inventoryService, InventoryItem } from '../../../services/inventory';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import UnitSelector from '../../../components/UnitSelector';
 import InventoryItemCard from '../../../components/InventoryItemCard';
 import EmptyState from '../../../components/EmptyState';
@@ -10,10 +10,11 @@ import { Colors } from '../../../constants/Colors';
 export default function Inventory() {
     const [items, setItems] = useState<InventoryItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
-    const fetchInventory = async () => {
+    const fetchInventory = async (isRefresh = false) => {
         try {
-            setLoading(true);
+            if (!isRefresh) setLoading(true);
             const data = await inventoryService.getAll();
             setItems(data);
         } catch (error: any) {
@@ -26,12 +27,20 @@ export default function Inventory() {
             }
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
     };
 
-    useEffect(() => {
-        fetchInventory();
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        fetchInventory(true);
     }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchInventory();
+        }, [])
+    );
 
     // Edit State
     const [editModalVisible, setEditModalVisible] = useState(false);
@@ -136,6 +145,9 @@ export default function Inventory() {
                     data={filteredItems}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={renderItem}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary.DEFAULT]} />
+                    }
                     ListEmptyComponent={
                         <EmptyState
                             title="Kileriniz Boş"

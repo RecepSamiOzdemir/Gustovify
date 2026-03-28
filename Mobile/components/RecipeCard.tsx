@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Recipe } from '../services/recipes';
 import { RecipeSuggestion } from '../services/ai';
@@ -13,8 +13,20 @@ export default function RecipeCard({ item, onPressDetail, onPressDelete }: Recip
     const isSuggestion = 'missing_count' in item;
     const missingCount = isSuggestion ? (item as RecipeSuggestion).missing_count : 0;
 
+    const imageUrl = 'image_url' in item ? item.image_url : undefined;
+
     return (
-        <View className="bg-white p-4 rounded-2xl shadow-sm mb-4 border border-gray-100">
+        <View className="bg-white rounded-2xl shadow-sm mb-4 border border-gray-100 overflow-hidden">
+            {/* Recipe Image */}
+            {imageUrl ? (
+                <Image
+                    source={{ uri: imageUrl }}
+                    className="w-full h-40"
+                    resizeMode="cover"
+                />
+            ) : null}
+
+            <View className="p-4">
             {/* Header */}
             <View className="flex-row justify-between items-start mb-3">
                 <Text className="text-lg font-bold text-gray-800 flex-1 mr-2 leading-6">
@@ -57,6 +69,7 @@ export default function RecipeCard({ item, onPressDetail, onPressDelete }: Recip
                         <Text className="text-orange-600 font-bold text-sm">Tarife Git →</Text>
                     </TouchableOpacity>
                 </View>
+            </View>
             </View>
         </View>
     );

@@ -1,6 +1,8 @@
-from recipe_scrapers import scrape_html
-import requests
 import re
+
+import requests
+from recipe_scrapers import scrape_html
+
 
 def extract_recipe_from_url(url: str):
     """
@@ -18,10 +20,10 @@ def extract_recipe_from_url(url: str):
 
         # Use scrape_html with supported_only=False to allow generic Schema.org scraping
         scraper = scrape_html(html=html_content, org_url=url, supported_only=False)
-        
+
         title = scraper.title()
         image = scraper.image()
-        
+
         # Servings parsing
         try:
             yields = scraper.yields()
@@ -50,7 +52,7 @@ def extract_recipe_from_url(url: str):
                 instructions = [i.strip() for i in instructions if i.strip()]
         except:
             pass
-        
+
         return {
             "title": title,
             "ingredients": ingredients,
@@ -78,12 +80,12 @@ def parse_ingredient_string(text):
     Parses a string like '2 su bardağı şeker' into {amount, unit, name}.
     """
     text = text.strip()
-    
+
     # 1. Extract amount (number at start)
     # Matches: "2", "2.5", "2,5", "1/2" (basic fraction)
     amount = 1.0
     amount_match = re.match(r'^([\d\.\,]+)\s*(.*)', text)
-    
+
     rest = text
     if amount_match:
         amount_str = amount_match.group(1).replace(',', '.')
@@ -92,7 +94,7 @@ def parse_ingredient_string(text):
             rest = amount_match.group(2).strip()
         except ValueError:
             pass
-            
+
     # 2. Extract Unit (Longest match wins)
     # Define known units and their standard representation
     # Order matters: longer phrases first to avoid partial matches
@@ -123,49 +125,49 @@ def parse_ingredient_string(text):
         'tbsp': 'yemek kaşığı',
         'tsp': 'çay kaşığı',
     }
-    
+
     found_unit = 'adet'
     is_special = True
-    
+
     # Try to find a unit at the beginning of 'rest'
     # We sort keys by length descending to match 'su bardağı' before 'su' (if 'su' was a unit)
     sorted_units = sorted(unit_map.keys(), key=len, reverse=True)
-    
+
     lower_rest = rest.lower()
-    
+
     for unit_key in sorted_units:
         # Check if the remaining string starts with this unit
         # We add a space check or end of string check to avoid partial word matches
         if lower_rest.startswith(unit_key):
-            # Verify it's a whole word match? 
+            # Verify it's a whole word match?
             # e.g. "gram" matches "gramofon" -> need boundary check
             # For simplicity, check if next char is space or end of string
             after_unit = lower_rest[len(unit_key):]
             if not after_unit or after_unit[0].isspace() or after_unit[0] in ['.', ',']:
                 found_unit = unit_map[unit_key]
-                
+
                 # Update rest to be everything after the unit
                 rest = rest[len(unit_key):].strip()
-                
+
                 # Check formatting of rest (remove leading dots etc)
                 rest = rest.lstrip('.,- ')
-                
+
                 # Determine if special unit (standard ones imply not special)
                 if found_unit in ['kg', 'g', 'l', 'ml']:
                     is_special = False
                 elif found_unit in ['bardak', 'yemek kaşığı', 'çay kaşığı', 'tatlı kaşığı', 'çay bardağı']:
                     # Assuming these are standard enough or user can pick them
                     is_special = False # Actually UI treats 'bardak' as special unit potentially?
-                    # Let's check logic: is_special_unit=True usually means "not a weight/volume" 
+                    # Let's check logic: is_special_unit=True usually means "not a weight/volume"
                     # But if we have a selector for them, we might want consistent handling.
                     # For now, let's say volume/weight = False, others = True?
                     # Actually looking at AddRecipe.tsx logic, unit selector has limited options.
                     pass
-                
+
                 break
-    
+
     name = rest
-    
+
     # Clean up name
     # Remove common noise words if they appear at start
     noise_words = ['bir', 'iki', 'üç', 'kadar']
@@ -176,7 +178,7 @@ def parse_ingredient_string(text):
     # Capitalize first letter
     if name:
         name = name[0].upper() + name[1:]
-            
+
     return {
         "name": name,
         "amount": amount,

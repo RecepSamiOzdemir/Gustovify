@@ -1,0 +1,38 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - "Backend/**"
+  pull_request:
+    paths:
+      - "Backend/**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          pip install -r Backend/requirements.txt
+          pip install -r Backend/requirements-dev.txt || true
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Lint
+        run: ruff check Backend/
+        continue-on-error: true
+
+      - name: Test
+        run: cd Backend && pytest --tb=short
+        continue-on-error: true

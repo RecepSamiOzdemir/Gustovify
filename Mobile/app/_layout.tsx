@@ -7,6 +7,7 @@ import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '../drizzle/migrations';
 import { useDrizzleStudio } from 'expo-drizzle-studio-plugin';
 import * as SQLite from 'expo-sqlite';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import '../global.css';
 
 function DbInitializedLayout() {
@@ -48,16 +49,20 @@ export default function RootLayout() {
     // Web Fallback (No DB)
     if (!db) {
         return (
-            <>
+            <ErrorBoundary>
                 <StatusBar style="dark" />
                 <Stack screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="index" />
                     <Stack.Screen name="(auth)" />
                     <Stack.Screen name="(tabs)" />
                 </Stack>
-            </>
+            </ErrorBoundary>
         );
     }
 
-    return <DbInitializedLayout />;
+    return (
+        <ErrorBoundary>
+            <DbInitializedLayout />
+        </ErrorBoundary>
+    );
 }

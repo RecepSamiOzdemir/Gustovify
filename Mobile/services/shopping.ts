@@ -5,7 +5,8 @@ export { ShoppingListItem };
 
 export const shoppingService = {
     getAll: async (token?: string): Promise<ShoppingListItem[]> => {
-        return api.get('/shopping-list/', token);
+        const data = await api.get('/shopping-list/', token);
+        return data.items ?? data;
     },
 
     add: async (item: ShoppingListCreate) => {

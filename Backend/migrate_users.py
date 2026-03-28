@@ -1,5 +1,5 @@
-import sqlite3
 import os
+import sqlite3
 
 db_path = 'c:\\Users\\recep\\Gustovify\\Backend\\gustovify.db'
 
@@ -31,7 +31,7 @@ def migrate_db():
                 print("allergies kolonu zaten var.")
             else:
                 raise e
-        
+
         # Add avatar_url column
         try:
             cursor.execute("ALTER TABLE users ADD COLUMN avatar_url VARCHAR")

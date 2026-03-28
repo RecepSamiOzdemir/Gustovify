@@ -1,7 +1,5 @@
-import sqlite3
-import os
-from database import SessionLocal
 import models
+from database import SessionLocal
 
 # Data Sets (Turkish)
 CATEGORIES = [
@@ -48,7 +46,7 @@ PREFERENCES = [
 
 def seed_database():
     db = SessionLocal()
-    
+
     print("Seeding Categories...")
     for cat_data in CATEGORIES:
         exists = db.query(models.Category).filter(models.Category.name == cat_data["name"]).first()
@@ -63,7 +61,7 @@ def seed_database():
             if not exists.icon:
                 exists.icon = cat_data["icon"]
                 print(f"Updated Icon for: {cat_data['name']}")
-                
+
     print("\nSeeding Allergens...")
     for name in ALLERGENS:
         exists = db.query(models.Allergen).filter(models.Allergen.name == name).first()

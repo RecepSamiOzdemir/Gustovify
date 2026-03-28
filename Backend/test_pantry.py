@@ -1,5 +1,6 @@
-import requests
 import sys
+
+import requests
 
 BASE_URL = "http://127.0.0.1:8000"
 
@@ -23,7 +24,7 @@ def test_pantry_flow():
     if resp.status_code != 200:
         print(f"Login failed: {resp.text}")
         sys.exit(1)
-    
+
     token = resp.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     print("Login successful.")
@@ -50,16 +51,16 @@ def test_pantry_flow():
     if resp.status_code != 200:
         print(f"Get inventory failed: {resp.text}")
         sys.exit(1)
-    
+
     items = resp.json()
     print(f"Inventory items: {items}")
-    
+
     found = False
     for i in items:
         if i["name"] == "Test Domates" and i["category"] == "Sebze":
             found = True
             break
-    
+
     if found:
         print("SUCCESS: Item found in inventory with correct details.")
     else:

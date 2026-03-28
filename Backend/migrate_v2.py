@@ -1,6 +1,6 @@
-import sqlite3
 import os
 import shutil
+import sqlite3
 
 # Paths
 DB_PATH = 'c:\\Users\\recep\\Gustovify\\Backend\\gustovify.db'
@@ -45,9 +45,9 @@ def migrate_data():
     ingredients = fetch_all(cursor, "ingredients")
     inventory = fetch_all(cursor, "inventory")
     users = fetch_all(cursor, "users")
-    
+
     conn.close()
-    
+
     # Logic to normalize ingredients
     print("Normalizing ingredients...")
     # Clean names
@@ -55,18 +55,18 @@ def migrate_data():
     for row in ingredients:
         if row.get('name'):
             all_names.add(row['name'].strip().lower().title())
-    
+
     for row in inventory:
         if row.get('name'):
             all_names.add(row['name'].strip().lower().title())
-    
+
     master_map = {} # name -> id (will be assigned later)
     master_list = []
-    
+
     for idx, name in enumerate(sorted(all_names), 1):
         master_map[name.lower()] = idx
         master_list.append({'id': idx, 'name': name, 'is_verified': False})
-    
+
     print(f"Found {len(master_list)} unique master ingredients.")
 
     # Recreate DB
@@ -79,14 +79,13 @@ def migrate_data():
              return
 
     # Create tables via SQLAlchemy
-    from database import engine, Base
-    import models 
+    from database import Base, engine
     Base.metadata.create_all(bind=engine)
     print("Tables created.")
-    
+
     new_conn = create_connection(DB_PATH)
     new_cursor = new_conn.cursor()
-    
+
     # Insert Users
     if users:
         print(f"Restoring {len(users)} users...")
@@ -101,7 +100,7 @@ def migrate_data():
     if master_list:
         print(f"Inserting {len(master_list)} master ingredients...")
         for m in master_list:
-             new_cursor.execute("INSERT INTO master_ingredients (id, name, is_verified) VALUES (?, ?, ?)", 
+             new_cursor.execute("INSERT INTO master_ingredients (id, name, is_verified) VALUES (?, ?, ?)",
                                 (m['id'], m['name'], m['is_verified']))
 
     # Insert Recipes
@@ -140,7 +139,7 @@ def migrate_data():
                 cat = i.get('category')
                 exp = i.get('expiry_date')
                 user_id = i['user_id']
-                
+
                 new_cursor.execute("""
                     INSERT INTO inventory (amount, unit, category, expiry_date, user_id, ingredient_id)
                     VALUES (?, ?, ?, ?, ?, ?)

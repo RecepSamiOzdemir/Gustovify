@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, Platform } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, Platform, RefreshControl } from 'react-native';
 import { useState, useCallback } from 'react';
 import { shoppingService, ShoppingListItem } from '../../../services/shopping';
 import { router, useFocusEffect } from 'expo-router';
@@ -9,10 +9,11 @@ export default function ShoppingList() {
     const [items, setItems] = useState<ShoppingListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [moving, setMoving] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
-    const fetchList = async () => {
+    const fetchList = async (isRefresh = false) => {
         try {
-            setLoading(true);
+            if (!isRefresh) setLoading(true);
             const data = await shoppingService.getAll();
             setItems(data);
         } catch (error: any) {
@@ -25,8 +26,14 @@ export default function ShoppingList() {
             }
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
     };
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        fetchList(true);
+    }, []);
 
     useFocusEffect(
         useCallback(() => {
@@ -136,6 +143,9 @@ export default function ShoppingList() {
                     data={items}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={renderItem}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary.DEFAULT]} />
+                    }
                     ListEmptyComponent={
                         <EmptyState
                             title="Listeniz Boş"

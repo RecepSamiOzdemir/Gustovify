@@ -1,6 +1,7 @@
-import sqlite3
 import os
-import utils # Import our new normalization logic
+import sqlite3
+
+import utils  # Import our new normalization logic
 
 DB_PATH = 'c:\\Users\\recep\\Gustovify\\Backend\\gustovify.db'
 
@@ -23,7 +24,7 @@ def normalize_existing_data():
     print("Normalizing recipe ingredients...")
     cursor.execute("SELECT id, unit FROM recipe_ingredients")
     rows = cursor.fetchall()
-    
+
     count = 0
     for row in rows:
         item_id, unit = row
@@ -32,13 +33,13 @@ def normalize_existing_data():
             cursor.execute("UPDATE recipe_ingredients SET unit = ? WHERE id = ?", (normalized, item_id))
             count += 1
             print(f"Recipe Ingredient {item_id}: '{unit}' -> '{normalized}'")
-            
+
     print(f"Updated {count} recipe ingredients.")
 
     print("Normalizing inventory items...")
     cursor.execute("SELECT id, unit FROM inventory")
     rows = cursor.fetchall()
-    
+
     count = 0
     for row in rows:
         item_id, unit = row
@@ -49,7 +50,7 @@ def normalize_existing_data():
             print(f"Inventory Item {item_id}: '{unit}' -> '{normalized}'")
 
     print(f"Updated {count} inventory items.")
-    
+
     conn.commit()
     conn.close()
     print("Normalization complete.")

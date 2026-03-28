@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, Date, Table
+from sqlalchemy import Boolean, Column, Date, Float, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
+
 from database import Base
 
 # Association Tables
@@ -46,6 +47,7 @@ class Recipe(Base):
     title = Column(String)
     instructions = Column(String)  # JSON string
     servings = Column(Integer)
+    image_url = Column(String, nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     ingredients = relationship("RecipeIngredient", back_populates="recipe", cascade="all, delete-orphan")
@@ -58,7 +60,7 @@ class RecipeIngredient(Base): # Renamed from Ingredient
     amount = Column(Float)
     unit = Column(String)
     is_special_unit = Column(Boolean, default=False) # TDD 4.2 [cite: 56]
-    
+
     recipe_id = Column(Integer, ForeignKey("recipes.id"))
     ingredient_id = Column(Integer, ForeignKey("master_ingredients.id"))
 
@@ -75,7 +77,7 @@ class Inventory(Base):
     amount = Column(Float)
     unit = Column(String)
     expiry_date = Column(Date, nullable=True)
-    
+
     user_id = Column(Integer, ForeignKey("users.id"))
     ingredient_id = Column(Integer, ForeignKey("master_ingredients.id"))
 
@@ -85,7 +87,7 @@ class Inventory(Base):
     @property
     def name(self):
         return self.master_ingredient.name if self.master_ingredient else None
-    
+
     @property
     def category(self):
         return self.master_ingredient.category.name if self.master_ingredient and self.master_ingredient.category else None
@@ -96,7 +98,7 @@ class ShoppingListItem(Base):
     amount = Column(Float)
     unit = Column(String)
     is_checked = Column(Boolean, default=False)
-    
+
     user_id = Column(Integer, ForeignKey("users.id"))
     ingredient_id = Column(Integer, ForeignKey("master_ingredients.id"))
 
@@ -106,7 +108,7 @@ class ShoppingListItem(Base):
     @property
     def name(self):
         return self.master_ingredient.name if self.master_ingredient else None
-    
+
     @property
     def category(self):
         return self.master_ingredient.category.name if self.master_ingredient and self.master_ingredient.category else None

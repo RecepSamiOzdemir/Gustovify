@@ -5,7 +5,8 @@ export { InventoryItem }; // Re-export for convenience
 
 export const inventoryService = {
     getAll: async (token?: string): Promise<InventoryItem[]> => {
-        return api.get('/inventory/', token);
+        const data = await api.get('/inventory/', token);
+        return data.items ?? data;
     },
 
     add: async (item: InventoryCreate) => {

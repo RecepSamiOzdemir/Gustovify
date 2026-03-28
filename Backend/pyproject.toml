@@ -1,0 +1,11 @@
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+exclude = ["venv", "migrate_*.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501", "E712"]
+
+[tool.ruff.lint.per-file-ignores]
+"utils_scraper.py" = ["E722"]

@@ -1,6 +1,6 @@
-import sqlite3
 import os
 import shutil
+import sqlite3
 
 DB_PATH = 'c:\\Users\\recep\\Gustovify\\Backend\\gustovify.db'
 BACKUP_PATH = 'c:\\Users\\recep\\Gustovify\\Backend\\gustovify_cats_backup.db'
@@ -24,8 +24,7 @@ def migrate_categories():
         print(f"Backup created at {BACKUP_PATH}")
 
     # Ensure tables exist
-    from database import engine, Base
-    import models
+    from database import Base, engine
     Base.metadata.create_all(bind=engine)
     print("Ensured Category table exists.")
 
@@ -37,7 +36,7 @@ def migrate_categories():
     cursor.execute("PRAGMA table_info(master_ingredients)")
     master_cols_info = cursor.fetchall()
     master_cols = [col[1] for col in master_cols_info]
-    
+
     # Check if category_id exists, if not, add it
     if "category_id" not in master_cols:
         print("Adding 'category_id' column to master_ingredients...")
@@ -46,7 +45,7 @@ def migrate_categories():
 
     # Access legacy 'category' column if it exists
     has_legacy_cat = "category" in master_cols
-    
+
     master_rows = []
     if has_legacy_cat:
         cursor.execute("SELECT id, category FROM master_ingredients WHERE category IS NOT NULL")
@@ -102,7 +101,7 @@ def migrate_categories():
         if cat_str and ing_id:
             clean_name = cat_str.strip().title()
             cat_id = cat_map.get(clean_name)
-            
+
             # Check if master needs update
             cursor.execute("SELECT category_id FROM master_ingredients WHERE id = ?", (ing_id,))
             res = cursor.fetchone()
@@ -113,7 +112,7 @@ def migrate_categories():
 
     # We do NOT drop columns here because SQLite makes it hard/risky without full rewrite.
     # We will just ignore the old columns in our code.
-    
+
     conn.commit()
     conn.close()
     print("Category migration complete.")

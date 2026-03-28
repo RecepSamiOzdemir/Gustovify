@@ -100,6 +100,7 @@ export interface Recipe {
     title: string;
     instructions: string[];
     servings: number;
+    image_url?: string;
     ingredients: RecipeIngredient[];
     user_id?: number;
 }

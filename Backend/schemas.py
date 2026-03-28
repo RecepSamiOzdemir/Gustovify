@@ -1,6 +1,16 @@
-from pydantic import BaseModel, field_validator
-from typing import List, Optional
 from datetime import date
+from typing import Generic, List, Optional, TypeVar
+
+from pydantic import BaseModel, field_validator
+
+# Generic Paginated Response
+T = TypeVar('T')
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    items: List[T]
+    total: int
+    skip: int
+    limit: int
 
 # TDD 3.5: Malzemenin parametrik objeye dönüştürülmüş taban modeli
 class CategoryBase(BaseModel):
@@ -23,7 +33,7 @@ class MasterIngredient(MasterIngredientBase):
     id: int
     is_verified: bool
     category: Optional[Category] = None
-    
+
     class Config:
         from_attributes = True
 
@@ -56,7 +66,24 @@ class RecipeCreate(RecipeBase):
 class Recipe(RecipeBase):
     id: int
     user_id: Optional[int] = None
+    image_url: Optional[str] = None
     ingredients: List[Ingredient]
+
+    @field_validator('instructions', mode='before')
+    @classmethod
+    def parse_instructions_from_db(cls, v):
+        if isinstance(v, list):
+            return v
+        if not v:
+            return []
+        try:
+            import json
+            parsed = json.loads(v)
+            if isinstance(parsed, list):
+                return parsed
+        except (json.JSONDecodeError, TypeError):
+            pass
+        return [s.strip() for s in v.split("|") if s.strip()]
 
     class Config:
         from_attributes = True
@@ -180,7 +207,7 @@ class User(UserBase):
     gender: Optional[str] = None
     cooking_level: Optional[str] = None
     avatar_url: Optional[str] = None
-    
+
     # Relationships
     related_allergens: List[Allergen] = []
     related_preferences: List[DietaryPreference] = []
